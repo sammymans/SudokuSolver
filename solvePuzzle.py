@@ -1,3 +1,4 @@
+#starting position of the sudoku board
 board = [
             [7,8,0,4,0,0,1,2,0],
             [6,0,0,0,7,5,0,0,9],
@@ -13,7 +14,7 @@ board = [
 def printBoard(board):
     #cycle through the number of rows in the grid
     for i in range(len(board)):
-        #if our row is divisuble by 3, lets add the qudrant dividers
+        #if our row is divisuble by 3, lets add some quadrant dividers
         if(i % 3 == 0 and i != 0):
             print(" - - - - - - - - - - - - -")
 
@@ -29,9 +30,6 @@ def printBoard(board):
             #if not, just print normally with spaces in between numbers AND on the same line (end = "")
             else:
                 print(str(board[i][j]) + " ", end="")
-            
-
-printBoard(board)
 
 def findEmpty(board):
     #loop through the entire board
@@ -42,7 +40,8 @@ def findEmpty(board):
                 #return the position
                 return i,j                  #return as 'row', 'col'
 
-findEmpty(board)
+    #If no squares are equal to zero just return None
+    return None
 
 def valid(board, num, pos):
     #note: pos is a tuple, so pos[0] represents the first element -> in our case the row
@@ -57,17 +56,48 @@ def valid(board, num, pos):
             return False
 
     #Check if the number is valid in the 3x3 BOX it is in
+    #First determine the location of the box in x,y coordinates
     boxPosX = pos[1] // 3
     boxPosY = pos[0] // 3
 
+    #Loop through only the box we are working in
     for i in range(boxPosY * 3, boxPosY * 3 + 3):
         for j in range(boxPosX * 3, boxPosX * 3 + 3):
             if(board[i][j] == num and i != pos[0] and j != pos[1]):
                 return False
 
-    #if all the above checks fail above, that means our spot is valid -> True
+    #if all the above checks fail above (row, col, box), that means our spot is valid -> return True
     return True
 
-print(valid(board=board, num=3, pos=(0,0)))
+def solve(board):
+    #base case:
+
+    #variable find for whether or not the element in grid is empty or not
+    find = findEmpty(board)
+    #if it has an element (not empty), just return True -> we found the solution
+    if not find:
+        return True
+    #else, findEmpty(board) will return the coordinates for row, col, so set those equal to two variables row,col
+    else:
+        row, col = find 
+
+    #attempt to put numbers 1-9 in the solution
+    for num in range(1,10):
+        #if the value attempted is actually valid, replace that spot on the board with the attempted number
+        if valid(board, num, (row, col)):
+            #if it is valid, input that value into the board
+            board[row][col] = num
+
+            #if the board solved, we need to return True for the base case
+            if(solve(board)):
+                return True
+            
+            #if the board did not solve, reset the value back to 0 to re run the method "solve"
+            board[row][col] = 0
+    
+    #if the board did not solve, we need to return False
+    return False
 
 
+solve(board)
+printBoard(board)
