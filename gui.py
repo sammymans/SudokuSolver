@@ -1,5 +1,8 @@
 # import pygame library to have access to certain commands
 import pygame
+
+import time
+
 # access pygame font
 pygame.font.init()
  
@@ -22,20 +25,20 @@ val = 0
 
 # Pre-made Sudoku Board - off a random website
 grid =  [
-            [7, 8, 0, 4, 0, 0, 1, 2, 0],
-            [6, 0, 0, 0, 7, 5, 0, 0, 9],
-            [0, 0, 0, 6, 0, 1, 0, 7, 8],
-            [0, 0, 7, 0, 4, 0, 2, 6, 0],
-            [0, 0, 1, 0, 5, 0, 9, 3, 0],
-            [9, 0, 4, 0, 6, 0, 0, 0, 5],
-            [0, 7, 0, 3, 0, 0, 0, 1, 2],
-            [1, 2, 0, 0, 0, 7, 4, 0, 0],
-            [0, 4, 9, 2, 0, 6, 0, 0, 7]
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]
         ]
  
 # Make two pre-set fonts
 font1 = pygame.font.SysFont("comicsans", 40)
-font2 = pygame.font.SysFont("comicsans", 20)
+font2 = pygame.font.SysFont("arial", 14)
 # Parameters are name, fontSize
 
 # Function to return the x,y "coordinates" given the position of the mouse
@@ -120,37 +123,48 @@ def valid(grid, i, j, val):
     #If pass all the above tests, return True -> the box is valid
     return True
  
-# Solves the sudoku board using Backtracking Algorithm
+# Function to solve the given sudoku board using Backtracking Algorithm
 def solve(grid, i, j):
-     
+
+    # Cycle through each box in the grid 
     while grid[i][j]!= 0:
         if i<8:
             i+= 1
         elif i == 8 and j<8:
             i = 0
             j+= 1
+        # if we've reached the last box
         elif i == 8 and j == 8:
             return True
 
     #internally process pygame event handlers
     pygame.event.pump()   
 
+
     for it in range(1, 10):
+        # if the number it we tested is valid
         if valid(grid, i, j, it)== True:
+            # set that square the the valid number
             grid[i][j]= it
             global x, y
             x = i
             y = j
-            # white color background\
-            #screen.fill((255, 255, 255))
+
+            # white color background
+            screen.fill((255, 255, 255))
             draw()
             draw_box()
+
+            # make the display Surface ( from pygame.display.set_mode() ) appear on the screen
             pygame.display.update()
+            #pause the program for an amount of time (milliseconds)
             pygame.time.delay(20)
+
             if solve(grid, i, j)== 1:
                 return True
             else:
                 grid[i][j]= 0
+
             # white color background\
             screen.fill((255, 255, 255))
          
@@ -158,41 +172,49 @@ def solve(grid, i, j):
             draw_box()
             pygame.display.update()
             pygame.time.delay(50)   
+
     return False 
  
 # Fuction to display instructions for the game
 def instruction():
-    text1 = font2.render("PRESS D TO RESET TO DEFAULT / R TO EMPTY", 1, (0, 0, 0))
-    text2 = font2.render("ENTER VALUES AND PRESS ENTER TO VISUALIZE", 1, (0, 0, 0))
-    screen.blit(text1, (20, 520))       
+    #text1 = font2.render("PRESS D TO RESET TO DEFAULT / R TO EMPTY", 1, (0, 0, 0))
+    text2 = font2.render("Press 'Enter' to begin the Backtracking Algorithm", 1, (0, 0, 0))
+    #screen.blit(text1, (20, 520))       
     screen.blit(text2, (20, 540))
  
 # Display options when solved
 def result():
-    text1 = font1.render("FINISHED PRESS R or D", 1, (0, 0, 0))
+    text1 = font1.render("Sudoku Puzzle Solved", 1, (0, 0, 0))
     screen.blit(text1, (20, 570))   
+
 run = True
 flag1 = 0
 flag2 = 0
 rs = 0
 error = 0
-# The loop thats keep the window running
+
+# loop thats keep the window running
 while run:
      
     # White color background
     screen.fill((255, 255, 255))
+
     # Loop through the events stored in event.get()
     for event in pygame.event.get():
-        # Quit the game window
+        # Make run false to quit the game window if exit button pressed
         if event.type == pygame.QUIT:
             run = False 
-        # Get the mouse position to insert number   
+
+        # Get the mouse position
         if event.type == pygame.MOUSEBUTTONDOWN:
             flag1 = 1
             pos = pygame.mouse.get_pos()
+            # get the position of where the mouse is using the get_cord function
             get_cord(pos)
+        
         # Get the number to be inserted if key pressed   
         if event.type == pygame.KEYDOWN:
+            # code to use arrow keys to pan around the grid
             if event.key == pygame.K_LEFT:
                 x-= 1
                 flag1 = 1
@@ -205,6 +227,8 @@ while run:
             if event.key == pygame.K_DOWN:
                 y+= 1
                 flag1 = 1   
+            
+            # if numbers are pressed
             if event.key == pygame.K_1:
                 val = 1
             if event.key == pygame.K_2:
@@ -223,69 +247,50 @@ while run:
                 val = 8
             if event.key == pygame.K_9:
                 val = 9 
+            
+            # if the return key is hit
             if event.key == pygame.K_RETURN:
                 flag2 = 1  
-            # If R pressed clear the sudoku board
-            if event.key == pygame.K_r:
-                rs = 0
-                error = 0
-                flag2 = 0
-                grid =[
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                ]
-            # If D is pressed reset the board to default
-            if event.key == pygame.K_d:
-                rs = 0
-                error = 0
-                flag2 = 0
-                grid =[
-                    [7, 8, 0, 4, 0, 0, 1, 2, 0],
-                    [6, 0, 0, 0, 7, 5, 0, 0, 9],
-                    [0, 0, 0, 6, 0, 1, 0, 7, 8],
-                    [0, 0, 7, 0, 4, 0, 2, 6, 0],
-                    [0, 0, 1, 0, 5, 0, 9, 3, 0],
-                    [9, 0, 4, 0, 6, 0, 0, 0, 5],
-                    [0, 7, 0, 3, 0, 0, 0, 1, 2],
-                    [1, 2, 0, 0, 0, 7, 4, 0, 0],
-                    [0, 4, 9, 2, 0, 6, 0, 0, 7]
-                ]
+    
+    # if the return key is hit, flag2 will equal 1, and thus some code needs to be executed to solve using backtracking
     if flag2 == 1:
+        # if solve returns False, the puzzle is not solving
         if solve(grid, 0, 0)== False:
             error = 1
+        # else we are working towards a solution
         else:
             rs = 1
+        # reset flag2 variable for next loop
         flag2 = 0   
-    if val != 0:           
+
+    # if the value that was entered in a square was not a 0
+    if val != 0:   
+        # draw the value in the square        
         draw_val(val)
-        # print(x)
-        # print(y)
+
+        # check if the value inputted is valid or not
         if valid(grid, int(x), int(y), val)== True:
             grid[int(x)][int(y)]= val
             flag1 = 0
         else:
             grid[int(x)][int(y)]= 0
             raise_error2()  
+        # reset the value for the next loop
         val = 0   
        
+    # display different messages based on values of error, rs, flag
     if error == 1:
         raise_error1() 
     if rs == 1:
         result()       
     draw() 
     if flag1 == 1:
-        draw_box()      
+        draw_box()   
+           
     instruction()   
  
-    # Update window
+    # Update the window
     pygame.display.update() 
  
-# Quit pygame window   
+# Quit the entire pygame window   
 pygame.quit()    
